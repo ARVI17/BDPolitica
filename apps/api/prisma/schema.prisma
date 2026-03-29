@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CampaignType {
+  id        String   @id @db.Uuid
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  tenants   Tenant[]
+
+  @@map("campaign_types")
+}
+
+model Tenant {
+  id             String         @id @db.Uuid
+  campaignTypeId String         @map("campaign_type_id") @db.Uuid
+  code           String         @unique
+  name           String
+  description    String?
+  startsOn       DateTime?      @map("starts_on") @db.Date
+  endsOn         DateTime?      @map("ends_on") @db.Date
+  isActive       Boolean        @default(true) @map("is_active")
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime       @default(now()) @map("updated_at") @db.Timestamptz(6)
+  campaignType   CampaignType   @relation(fields: [campaignTypeId], references: [id])
+  users          User[]
+  userRoles      UserRole[]
+  refreshTokens  RefreshToken[]
+  roleCatalog    RoleCatalog[]
+  auditEvents    AuditEvent[]
+  settings       TenantSetting?
+
+  @@map("tenants")
+}
+
+model User {
+  id                  String         @id @db.Uuid
+  tenantId            String         @map("tenant_id") @db.Uuid
+  username            String
+  email               String
+  passwordHash        String         @map("password_hash")
+  mfaEnabled          Boolean        @default(false) @map("mfa_enabled")
+  mfaSecretEnc        String?        @map("mfa_secret_enc")
+  failedLoginAttempts Int            @default(0) @map("failed_login_attempts")
+  blockedUntil        DateTime?      @map("blocked_until") @db.Timestamptz(6)
+  lastLoginAt         DateTime?      @map("last_login_at") @db.Timestamptz(6)
+  isActive            Boolean        @default(true) @map("is_active")
+  createdAt           DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime       @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  tenant              Tenant         @relation(fields: [tenantId], references: [id])
+  userRoles           UserRole[]
+  refreshTokens       RefreshToken[]
+  auditEventsAsActor  AuditEvent[]   @relation("AuditActor")
+
+  @@unique([tenantId, username])
+  @@unique([tenantId, email])
+  @@map("users")
+}
+
+model RoleCatalog {
+  id              String           @id @db.Uuid
+  tenantId        String?          @map("tenant_id") @db.Uuid
+  code            String
+  name            String
+  isSystem        Boolean          @default(false) @map("is_system")
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime         @default(now()) @map("updated_at") @db.Timestamptz(6)
+  tenant          Tenant?          @relation(fields: [tenantId], references: [id])
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@unique([tenantId, code])
+  @@map("role_catalog")
+}
+
+model PermissionCatalog {
+  id              String           @id @db.Uuid
+  code            String           @unique
+  module          String
+  action          String
+  description     String?
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  rolePermissions RolePermission[]
+
+  @@map("permission_catalog")
+}
+
+model RolePermission {
+  id           String            @id @db.Uuid
+  roleId       String            @map("role_id") @db.Uuid
+  permissionId String            @map("permission_id") @db.Uuid
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  role         RoleCatalog       @relation(fields: [roleId], references: [id])
+  permission   PermissionCatalog @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id                String      @id @db.Uuid
+  tenantId          String      @map("tenant_id") @db.Uuid
+  userId            String      @map("user_id") @db.Uuid
+  roleId            String      @map("role_id") @db.Uuid
+  territoryId       String?     @map("territory_id") @db.Uuid
+  personRoleScopeId String?     @map("person_role_scope_id") @db.Uuid
+  validFrom         DateTime    @default(now()) @map("valid_from") @db.Timestamptz(6)
+  validTo           DateTime?   @map("valid_to") @db.Timestamptz(6)
+  isActive          Boolean     @default(true) @map("is_active")
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  tenant            Tenant      @relation(fields: [tenantId], references: [id])
+  user              User        @relation(fields: [userId], references: [id])
+  role              RoleCatalog @relation(fields: [roleId], references: [id])
+
+  @@unique([tenantId, userId, roleId, territoryId, validFrom])
+  @@map("user_roles")
+}
+
+model RefreshToken {
+  id                String         @id @db.Uuid
+  tenantId          String         @map("tenant_id") @db.Uuid
+  userId            String         @map("user_id") @db.Uuid
+  tokenHash         String         @map("token_hash")
+  issuedAt          DateTime       @default(now()) @map("issued_at") @db.Timestamptz(6)
+  expiresAt         DateTime       @map("expires_at") @db.Timestamptz(6)
+  revokedAt         DateTime?      @map("revoked_at") @db.Timestamptz(6)
+  replacedByTokenId String?        @map("replaced_by_token_id") @db.Uuid
+  ipAddress         String?        @map("ip_address") @db.Inet
+  userAgent         String?        @map("user_agent")
+  tenant            Tenant         @relation(fields: [tenantId], references: [id])
+  user              User           @relation(fields: [userId], references: [id])
+  replacedByToken   RefreshToken?  @relation("RefreshTokenReplacement", fields: [replacedByTokenId], references: [id])
+  replacesTokens    RefreshToken[] @relation("RefreshTokenReplacement")
+
+  @@map("refresh_tokens")
+}
+
+model AuditEvent {
+  id            String    @id @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  actorUserId   String?   @map("actor_user_id") @db.Uuid
+  actorType     String    @default("USER") @map("actor_type")
+  eventCategory String    @map("event_category")
+  eventName     String    @map("event_name")
+  targetTable   String?   @map("target_table")
+  targetId      String?   @map("target_id") @db.Uuid
+  requestId     String?   @map("request_id")
+  ipAddress     String?   @map("ip_address") @db.Inet
+  userAgent     String?   @map("user_agent")
+  payload       Json?     @db.JsonB
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  actorUser     User?     @relation("AuditActor", fields: [actorUserId], references: [id])
+
+  @@map("audit_events")
+}
+
+model TenantSetting {
+  id                  String   @id @db.Uuid
+  tenantId            String   @map("tenant_id") @unique @db.Uuid
+  timezone            String   @default("America/Bogota")
+  locale              String   @default("es-CO")
+  qrValidationSecret  String   @map("qr_validation_secret")
+  allowPartialReturns Boolean  @default(true) @map("allow_partial_returns")
+  requireMfaAdmin     Boolean  @default(true) @map("require_mfa_admin")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  tenant              Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@map("tenant_settings")
+}

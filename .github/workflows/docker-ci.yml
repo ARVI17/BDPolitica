@@ -1,0 +1,51 @@
+name: Docker QA
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i "s|^ACCESS_TOKEN_SECRET=.*|ACCESS_TOKEN_SECRET=ci-secret-with-at-least-32-characters-123456|" .env
+          sed -i "s|^DEV_ADMIN_PASSWORD=.*|DEV_ADMIN_PASSWORD=Admin12345!|" .env
+          sed -i "s|^DEV_COORDINADOR_PASSWORD=.*|DEV_COORDINADOR_PASSWORD=Coordi12345!|" .env
+
+      - name: Build and start services
+        run: docker compose up -d --build
+
+      - name: Initialize database
+        run: docker compose run --rm db-init
+
+      - name: API lint
+        run: docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api lint
+
+      - name: API tests
+        run: docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api test
+
+      - name: API typecheck
+        run: docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api typecheck
+
+      - name: Web lint
+        run: docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web lint
+
+      - name: Web typecheck
+        run: docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web typecheck
+
+      - name: Web build
+        run: docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web build
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

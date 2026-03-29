@@ -1,0 +1,20 @@
+{
+  "name": "bdpolitica",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "docker:up": "docker compose up -d --build",
+    "docker:init": "docker compose up -d --build && docker compose run --rm db-init",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f --tail=200",
+    "docker:init-db": "docker compose run --rm db-init",
+    "docker:test:api": "docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api test",
+    "docker:lint:api": "docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api lint",
+    "docker:typecheck:api": "docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api typecheck",
+    "docker:lint:web": "docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web lint",
+    "docker:typecheck:web": "docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web typecheck",
+    "docker:build:web": "docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web build",
+    "docker:qa": "docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api lint && docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api test && docker compose run --rm --no-deps api pnpm --filter @bdpolitica/api typecheck && docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web lint && docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web typecheck && docker compose run --rm --no-deps web pnpm --filter @bdpolitica/web build"
+  }
+}
