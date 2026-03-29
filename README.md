@@ -29,6 +29,7 @@ Se definieron y documentaron las decisiones de MVP:
 - Requisitos y alcance: `docs/01-requisitos-mvp.md`
 - Arquitectura y despliegue: `docs/02-arquitectura.md`
 - Modelo de datos SQL base: `docs/03-modelo-datos.sql`
+- Operacion, smoke tests y soporte: `docs/04-operacion-fase2.md`
 - Prompt maestro reutilizable: `docs/PROMPT_MAESTRO_AGENTE.md`
 
 ## Infra base local
@@ -87,3 +88,11 @@ Archivo: `docker-compose.yml`
 
 - Swagger UI: `http://localhost:3001/api/docs`
 - OpenAPI JSON: `http://localhost:3001/api/docs-json`
+
+## Logging DAO (BD)
+
+La capa de acceso a datos usa logging centralizado en Prisma (`PrismaService`):
+
+- `DAO_LOG_QUERIES=true|false`
+- `DAO_SLOW_QUERY_MS=300`
+- `DAO_LOG_QUERY_PARAMS=false` (mantener `false` para no exponer datos sensibles)
