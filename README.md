@@ -30,6 +30,7 @@ Se definieron y documentaron las decisiones de MVP:
 - Arquitectura y despliegue: `docs/02-arquitectura.md`
 - Modelo de datos SQL base: `docs/03-modelo-datos.sql`
 - Operacion, smoke tests y soporte: `docs/04-operacion-fase2.md`
+- Prompt maestro para diseño+operacion profesional: `docs/05-prompt-diseno-operativo.md`
 - Prompt maestro reutilizable: `docs/PROMPT_MAESTRO_AGENTE.md`
 
 ## Infra base local
@@ -88,6 +89,12 @@ Archivo: `docker-compose.yml`
 
 - Swagger UI: `http://localhost:3001/api/docs`
 - OpenAPI JSON: `http://localhost:3001/api/docs-json`
+
+## Frontend operativo
+
+- Dashboard ejecutivo: `http://localhost:3000/dashboard`
+- Gestion de usuarios: `http://localhost:3000/usuarios`
+- Login seguro con MFA: `http://localhost:3000/login`
 
 ## Logging DAO (BD)
 

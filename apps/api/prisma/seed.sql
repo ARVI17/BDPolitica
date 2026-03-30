@@ -255,7 +255,7 @@ INSERT INTO user_roles (
 )
 VALUES
   (
-    '1f1586f7-d6c8-4920-821a-74f8f0a44bf4',
+    gen_random_uuid(),
     '11111111-1111-7111-8111-111111111111',
     'aaaaaaaa-aaaa-7aaa-8aaa-aaaaaaaaaaaa',
     'f1586f7d-6c88-4920-821a-74f8f0a44bf4',
@@ -266,7 +266,7 @@ VALUES
     true
   ),
   (
-    '2f1586f7-d6c8-4920-821a-74f8f0a44bf4',
+    gen_random_uuid(),
     '11111111-1111-7111-8111-111111111111',
     'cccccccc-cccc-7ccc-8ccc-cccccccccccc',
     'f1586f7d-6c88-4920-821a-74f8f0a44bf4',
@@ -277,7 +277,7 @@ VALUES
     true
   ),
   (
-    '3f1586f7-d6c8-4920-821a-74f8f0a44bf4',
+    gen_random_uuid(),
     '11111111-1111-7111-8111-111111111111',
     'bbbbbbbb-bbbb-7bbb-8bbb-bbbbbbbbbbbb',
     '8d390f84-f6cc-41fb-84f8-5b38f969657f',
@@ -288,7 +288,7 @@ VALUES
     true
   ),
   (
-    '4f1586f7-d6c8-4920-821a-74f8f0a44bf4',
+    gen_random_uuid(),
     '11111111-1111-7111-8111-111111111111',
     'dddddddd-dddd-7ddd-8ddd-dddddddddddd',
     'f266d9c3-a6f9-4986-b1af-700bd6b9c6ef',
@@ -299,7 +299,7 @@ VALUES
     true
   ),
   (
-    '5f1586f7-d6c8-4920-821a-74f8f0a44bf4',
+    gen_random_uuid(),
     '22222222-2222-7222-8222-222222222222',
     'eeeeeeee-eeee-7eee-8eee-eeeeeeeeeeee',
     '8d390f84-f6cc-41fb-84f8-5b38f969657f',

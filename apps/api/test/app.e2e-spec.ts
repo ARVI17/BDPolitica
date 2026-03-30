@@ -259,4 +259,68 @@ describe("API Fase 2 (e2e)", () => {
     expect(events.every((item) => item.tenantId === TENANT_1)).toBe(true);
     expect(events.some((item) => item.actorUserId === admin.user.id)).toBe(true);
   });
+
+  it("gestion de usuarios: crear, listar y desactivar", async () => {
+    const adminLogin = await request(app.getHttpServer()).post("/api/auth/login").send({
+      tenantCode: "campana-demo-alcaldia",
+      username: "admin",
+      password: "Admin12345!",
+      mfaCode: "654321"
+    });
+    expect(adminLogin.status).toBe(201);
+    const admin = adminLogin.body as LoginResponse;
+
+    const roles = await request(app.getHttpServer())
+      .get("/api/users/roles")
+      .set("Authorization", `Bearer ${admin.accessToken}`)
+      .set("x-tenant-id", TENANT_1);
+    expect(roles.status).toBe(200);
+    expect(Array.isArray(roles.body)).toBe(true);
+
+    const suffix = Date.now().toString();
+    const username = `operador_${suffix}`;
+    const email = `operador_${suffix}@bdpolitica.local`;
+    const password = "Operador12345!";
+
+    const created = await request(app.getHttpServer())
+      .post("/api/users")
+      .set("Authorization", `Bearer ${admin.accessToken}`)
+      .set("x-tenant-id", TENANT_1)
+      .send({
+        username,
+        email,
+        password,
+        roleCode: "COORDINADOR"
+      });
+    expect(created.status).toBe(201);
+    expect(created.body.username).toBe(username);
+    expect(created.body.roleCode).toBe("COORDINADOR");
+
+    const listed = await request(app.getHttpServer())
+      .get("/api/users")
+      .query({ search: username })
+      .set("Authorization", `Bearer ${admin.accessToken}`)
+      .set("x-tenant-id", TENANT_1);
+    expect(listed.status).toBe(200);
+    expect(Array.isArray(listed.body)).toBe(true);
+    expect(listed.body.some((item: { username: string }) => item.username === username)).toBe(
+      true
+    );
+
+    const userId = created.body.id as string;
+    const disabled = await request(app.getHttpServer())
+      .patch(`/api/users/${userId}/status`)
+      .set("Authorization", `Bearer ${admin.accessToken}`)
+      .set("x-tenant-id", TENANT_1)
+      .send({ isActive: false });
+    expect(disabled.status).toBe(200);
+    expect(disabled.body.isActive).toBe(false);
+
+    const inactiveLogin = await request(app.getHttpServer()).post("/api/auth/login").send({
+      tenantCode: "campana-demo-alcaldia",
+      username,
+      password
+    });
+    expect(inactiveLogin.status).toBe(401);
+  });
 });

@@ -10,6 +10,7 @@ import { HealthController } from "./health.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { RbacModule } from "./rbac/rbac.module";
 import { TenantsModule } from "./tenants/tenants.module";
+import { UsersModule } from "./users/users.module";
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { TenantsModule } from "./tenants/tenants.module";
     AuditModule,
     AuthModule,
     TenantsModule,
-    RbacModule
+    RbacModule,
+    UsersModule
   ],
   controllers: [HealthController],
   providers: [

@@ -125,6 +125,16 @@ Eventos esperados:
 - `auth.refresh.reuse_detected`
 - `auth.logout_all.success`
 - `rbac.user_role.updated`
+- `users.created`
+- `users.status.updated`
+
+## 6.1) Endpoints clave de gestion de usuarios
+
+- `GET /api/users`
+- `GET /api/users/roles`
+- `POST /api/users`
+- `PATCH /api/users/:userId/status`
+- `POST /api/rbac/users/:userId/assign-role`
 
 ## 7) QA y calidad (bloqueo de merge)
 
